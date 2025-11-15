@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package health;
+
+option go_package = "github.com/yadav-shubh/base-backend/generated/health;health";
+
+import "google/protobuf/empty.proto";
+
+message HealthCheckResponse {
+  string status = 1;
+}
+
+service Health {
+  rpc healthCheck (google.protobuf.Empty) returns (HealthCheckResponse);
+}
