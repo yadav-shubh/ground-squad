@@ -42,3 +42,8 @@ protoc:
 	    --go-grpc_out=$(OUT_DIR) \
 	    modules/$(mod)/grpc/$(mod).proto; \
 	)
+
+clean:
+	@echo "Removing $(OUT_DIR)..."
+	@rm -rf $(OUT_DIR)
+	@echo "Clean complete."
