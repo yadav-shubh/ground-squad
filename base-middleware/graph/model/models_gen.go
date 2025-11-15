@@ -37,6 +37,25 @@ type AppUserUpdateInput struct {
 	IsDeleted         *bool   `json:"is_deleted,omitempty"`
 }
 
+type AuthCodeInput struct {
+	Code string `json:"code"`
+}
+
+type AuthCodeResponse struct {
+	Token     string   `json:"token"`
+	TokenType string   `json:"token_type"`
+	AppUser   *AppUser `json:"appUser"`
+}
+
+type AuthInfoResponse struct {
+	LoginURL  string  `json:"login_url"`
+	LogoutURL *string `json:"logout_url,omitempty"`
+}
+
+type HealthResponse struct {
+	Status string `json:"status"`
+}
+
 type Mutation struct {
 }
 

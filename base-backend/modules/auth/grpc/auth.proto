@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package auth;
+
+option go_package = "github.com/yadav-shubh/base-backend/generated/auth;auth";
+
+import "modules/app_user/grpc/app_user.proto";
+import "google/protobuf/empty.proto";
+
+message AuthCodeRequest {
+    string code = 1;
+}
+
+message AuthCodeResponse {
+    string token = 1;
+    string token_type = 2;
+    appuser.AppUser app_user = 3;
+}
+
+message AuthInfoResponse {
+    string login_url = 1;
+    string logout_url = 2;
+}
+
+service AuthService{
+  rpc Authenticate(AuthCodeRequest) returns (AuthCodeResponse);
+  rpc AuthInfo(google.protobuf.Empty) returns (AuthInfoResponse);
+}

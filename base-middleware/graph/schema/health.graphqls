@@ -1,0 +1,7 @@
+type HealthResponse {
+    status: String!
+}
+
+extend type Query {
+    health: HealthResponse!
+}

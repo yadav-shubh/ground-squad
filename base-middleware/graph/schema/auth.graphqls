@@ -1,0 +1,23 @@
+extend type Query {
+    authInfo: AuthInfoResponse!
+}
+
+extend type Mutation {
+    authenticate(input: AuthCodeInput!): AuthCodeResponse!
+}
+
+
+input AuthCodeInput {
+    code: String!
+}
+
+type AuthCodeResponse {
+    token: String!
+    token_type: String!
+    appUser: AppUser!
+}
+
+type AuthInfoResponse {
+    login_url: String!
+    logout_url: String
+}
