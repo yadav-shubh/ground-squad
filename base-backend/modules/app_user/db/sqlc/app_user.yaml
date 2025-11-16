@@ -1,0 +1,15 @@
+version: "2"
+sql:
+  - engine: "postgresql"
+    queries: "query.sql"
+    schema: "schema.sql"
+    gen:
+      go:
+        package: "generated"
+        sql_package: "database/sql"
+        sql_driver: "github.com/lib/pq"
+        out: "./generated"
+        overrides:
+          - db_type: "DECIMAL"
+            go_type: "github.com/shopspring/decimal.Decimal"
+

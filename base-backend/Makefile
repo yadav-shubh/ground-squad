@@ -43,7 +43,13 @@ protoc:
 	    modules/$(mod)/grpc/$(mod).proto; \
 	)
 
-clean:
-	@echo "Removing $(OUT_DIR)..."
-	@rm -rf $(OUT_DIR)
-	@echo "Clean complete."
+sqlc-generate:
+	@echo "=== Running sqlc for modules ==="
+	@$(foreach mod,$(GRPC_MODULES), \
+		if [ -f modules/$(mod)/db/sqlc/$(mod).yaml ]; then \
+			echo "-> Generating SQLC for $(mod)"; \
+			sqlc generate -f modules/$(mod)/db/sqlc/$(mod).yaml; \
+		else \
+			echo "-> Skipping $(mod) (no sqlc config found)"; \
+		fi; \
+	)

@@ -19,6 +19,8 @@ import (
 
 func main() {
 
+	utils.GetDB()
+
 	connStr := config.Get().Server.Host
 	utils.Log.Info("Binding gRPC server", zap.String("address", connStr))
 

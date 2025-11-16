@@ -1,8 +1,7 @@
 package config
 
 import (
-	"github.com/yadav-shubh/base-backend/utils"
-	"go.uber.org/zap"
+	"log"
 	"sync"
 
 	"github.com/spf13/viper"
@@ -17,6 +16,14 @@ type Config struct {
 	Server struct {
 		Host string
 	}
+	Database struct {
+		User     string
+		Password string
+		Host     string
+		Port     string
+		DBName   string
+		SSLMode  string
+	}
 }
 
 func loadConfig() {
@@ -26,12 +33,12 @@ func loadConfig() {
 	viper.AddConfigPath(".")
 
 	if err := viper.ReadInConfig(); err != nil {
-		utils.Log.Error("Failed to load config", zap.Error(err))
+		log.Println("Failed to load config", err)
 	}
 
 	var c Config
 	if err := viper.Unmarshal(&c); err != nil {
-		utils.Log.Error("Failed to unmarshal config", zap.Error(err))
+		log.Println("Failed to unmarshal config", err)
 	}
 
 	cfg = &c
