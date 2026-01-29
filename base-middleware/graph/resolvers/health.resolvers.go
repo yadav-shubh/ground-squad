@@ -6,7 +6,6 @@ package resolvers
 
 import (
 	"context"
-
 	"github.com/yadav-shubh/base-middleware/graph/model"
 	"github.com/yadav-shubh/base-middleware/modules"
 )
@@ -14,4 +13,9 @@ import (
 // Health is the resolver for the health field.
 func (r *queryResolver) Health(ctx context.Context) (*model.HealthResponse, error) {
 	return modules.CheckHealth(ctx), nil
+}
+
+// Health is the resolver for the health field.
+func (r *subscriptionResolver) Health(ctx context.Context) (<-chan *model.HealthResponse, error) {
+	return modules.CheckHealthSubs(ctx), nil
 }

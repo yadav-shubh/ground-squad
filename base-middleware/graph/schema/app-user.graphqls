@@ -49,4 +49,9 @@ type Mutation {
   deleteAppUser(id: ID!): AppUser
 }
 
+type Subscription {
+  appUserCreated: AppUser
+  appUserUpdated: AppUser
+  appUserDeleted: AppUser
+}
 

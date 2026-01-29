@@ -5,3 +5,7 @@ type HealthResponse {
 extend type Query {
     health: HealthResponse!
 }
+
+extend type Subscription {
+    health: HealthResponse!
+}

@@ -63,11 +63,30 @@ func (r *queryResolver) GetAppUserByIsDeleted(ctx context.Context, isDeleted boo
 	panic(fmt.Errorf("not implemented: GetAppUserByIsDeleted - getAppUserByIsDeleted"))
 }
 
+// AppUserCreated is the resolver for the appUserCreated field.
+func (r *subscriptionResolver) AppUserCreated(ctx context.Context) (<-chan *model.AppUser, error) {
+	panic(fmt.Errorf("not implemented: AppUserCreated - appUserCreated"))
+}
+
+// AppUserUpdated is the resolver for the appUserUpdated field.
+func (r *subscriptionResolver) AppUserUpdated(ctx context.Context) (<-chan *model.AppUser, error) {
+	panic(fmt.Errorf("not implemented: AppUserUpdated - appUserUpdated"))
+}
+
+// AppUserDeleted is the resolver for the appUserDeleted field.
+func (r *subscriptionResolver) AppUserDeleted(ctx context.Context) (<-chan *model.AppUser, error) {
+	panic(fmt.Errorf("not implemented: AppUserDeleted - appUserDeleted"))
+}
+
 // Mutation returns generated.MutationResolver implementation.
 func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
 
 // Query returns generated.QueryResolver implementation.
 func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
+// Subscription returns generated.SubscriptionResolver implementation.
+func (r *Resolver) Subscription() generated.SubscriptionResolver { return &subscriptionResolver{r} }
+
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
+type subscriptionResolver struct{ *Resolver }

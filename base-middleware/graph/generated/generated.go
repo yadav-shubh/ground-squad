@@ -40,6 +40,7 @@ type Config struct {
 type ResolverRoot interface {
 	Mutation() MutationResolver
 	Query() QueryResolver
+	Subscription() SubscriptionResolver
 }
 
 type DirectiveRoot struct {
@@ -92,6 +93,13 @@ type ComplexityRoot struct {
 		GetAppUsers                   func(childComplexity int, role *string, page *int, size *int) int
 		Health                        func(childComplexity int) int
 	}
+
+	Subscription struct {
+		AppUserCreated func(childComplexity int) int
+		AppUserDeleted func(childComplexity int) int
+		AppUserUpdated func(childComplexity int) int
+		Health         func(childComplexity int) int
+	}
 }
 
 type MutationResolver interface {
@@ -110,6 +118,12 @@ type QueryResolver interface {
 	GetAppUserByIsDeleted(ctx context.Context, isDeleted bool) (*model.AppUser, error)
 	AuthInfo(ctx context.Context) (*model.AuthInfoResponse, error)
 	Health(ctx context.Context) (*model.HealthResponse, error)
+}
+type SubscriptionResolver interface {
+	AppUserCreated(ctx context.Context) (<-chan *model.AppUser, error)
+	AppUserUpdated(ctx context.Context) (<-chan *model.AppUser, error)
+	AppUserDeleted(ctx context.Context) (<-chan *model.AppUser, error)
+	Health(ctx context.Context) (<-chan *model.HealthResponse, error)
 }
 
 type executableSchema struct {
@@ -366,6 +380,31 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Query.Health(childComplexity), true
 
+	case "Subscription.appUserCreated":
+		if e.complexity.Subscription.AppUserCreated == nil {
+			break
+		}
+
+		return e.complexity.Subscription.AppUserCreated(childComplexity), true
+	case "Subscription.appUserDeleted":
+		if e.complexity.Subscription.AppUserDeleted == nil {
+			break
+		}
+
+		return e.complexity.Subscription.AppUserDeleted(childComplexity), true
+	case "Subscription.appUserUpdated":
+		if e.complexity.Subscription.AppUserUpdated == nil {
+			break
+		}
+
+		return e.complexity.Subscription.AppUserUpdated(childComplexity), true
+	case "Subscription.health":
+		if e.complexity.Subscription.Health == nil {
+			break
+		}
+
+		return e.complexity.Subscription.Health(childComplexity), true
+
 	}
 	return 0, false
 }
@@ -420,6 +459,23 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 			ctx = graphql.WithUnmarshalerMap(ctx, inputUnmarshalMap)
 			data := ec._Mutation(ctx, opCtx.Operation.SelectionSet)
 			var buf bytes.Buffer
+			data.MarshalGQL(&buf)
+
+			return &graphql.Response{
+				Data: buf.Bytes(),
+			}
+		}
+	case ast.Subscription:
+		next := ec._Subscription(ctx, opCtx.Operation.SelectionSet)
+
+		var buf bytes.Buffer
+		return func(ctx context.Context) *graphql.Response {
+			buf.Reset()
+			data := next(ctx)
+
+			if data == nil {
+				return nil
+			}
 			data.MarshalGQL(&buf)
 
 			return &graphql.Response{
@@ -525,6 +581,11 @@ type Mutation {
   deleteAppUser(id: ID!): AppUser
 }
 
+type Subscription {
+  appUserCreated: AppUser
+  appUserUpdated: AppUser
+  appUserDeleted: AppUser
+}
 
 `, BuiltIn: false},
 	{Name: "../schema/auth.graphqls", Input: `extend type Query {
@@ -555,6 +616,10 @@ type AuthInfoResponse {
 }
 
 extend type Query {
+    health: HealthResponse!
+}
+
+extend type Subscription {
     health: HealthResponse!
 }
 `, BuiltIn: false},
@@ -2095,6 +2160,192 @@ func (ec *executionContext) fieldContext_Query___schema(_ context.Context, field
 				return ec.fieldContext___Schema_directives(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type __Schema", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Subscription_appUserCreated(ctx context.Context, field graphql.CollectedField) (ret func(ctx context.Context) graphql.Marshaler) {
+	return graphql.ResolveFieldStream(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Subscription_appUserCreated,
+		func(ctx context.Context) (any, error) {
+			return ec.resolvers.Subscription().AppUserCreated(ctx)
+		},
+		nil,
+		ec.marshalOAppUser2ᚖgithubᚗcomᚋyadavᚑshubhᚋbaseᚑmiddlewareᚋgraphᚋmodelᚐAppUser,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_Subscription_appUserCreated(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Subscription",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_AppUser_id(ctx, field)
+			case "name":
+				return ec.fieldContext_AppUser_name(ctx, field)
+			case "username":
+				return ec.fieldContext_AppUser_username(ctx, field)
+			case "mobile":
+				return ec.fieldContext_AppUser_mobile(ctx, field)
+			case "preferred_username":
+				return ec.fieldContext_AppUser_preferred_username(ctx, field)
+			case "role":
+				return ec.fieldContext_AppUser_role(ctx, field)
+			case "is_active":
+				return ec.fieldContext_AppUser_is_active(ctx, field)
+			case "is_deleted":
+				return ec.fieldContext_AppUser_is_deleted(ctx, field)
+			case "created_at":
+				return ec.fieldContext_AppUser_created_at(ctx, field)
+			case "updated_at":
+				return ec.fieldContext_AppUser_updated_at(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type AppUser", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Subscription_appUserUpdated(ctx context.Context, field graphql.CollectedField) (ret func(ctx context.Context) graphql.Marshaler) {
+	return graphql.ResolveFieldStream(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Subscription_appUserUpdated,
+		func(ctx context.Context) (any, error) {
+			return ec.resolvers.Subscription().AppUserUpdated(ctx)
+		},
+		nil,
+		ec.marshalOAppUser2ᚖgithubᚗcomᚋyadavᚑshubhᚋbaseᚑmiddlewareᚋgraphᚋmodelᚐAppUser,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_Subscription_appUserUpdated(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Subscription",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_AppUser_id(ctx, field)
+			case "name":
+				return ec.fieldContext_AppUser_name(ctx, field)
+			case "username":
+				return ec.fieldContext_AppUser_username(ctx, field)
+			case "mobile":
+				return ec.fieldContext_AppUser_mobile(ctx, field)
+			case "preferred_username":
+				return ec.fieldContext_AppUser_preferred_username(ctx, field)
+			case "role":
+				return ec.fieldContext_AppUser_role(ctx, field)
+			case "is_active":
+				return ec.fieldContext_AppUser_is_active(ctx, field)
+			case "is_deleted":
+				return ec.fieldContext_AppUser_is_deleted(ctx, field)
+			case "created_at":
+				return ec.fieldContext_AppUser_created_at(ctx, field)
+			case "updated_at":
+				return ec.fieldContext_AppUser_updated_at(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type AppUser", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Subscription_appUserDeleted(ctx context.Context, field graphql.CollectedField) (ret func(ctx context.Context) graphql.Marshaler) {
+	return graphql.ResolveFieldStream(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Subscription_appUserDeleted,
+		func(ctx context.Context) (any, error) {
+			return ec.resolvers.Subscription().AppUserDeleted(ctx)
+		},
+		nil,
+		ec.marshalOAppUser2ᚖgithubᚗcomᚋyadavᚑshubhᚋbaseᚑmiddlewareᚋgraphᚋmodelᚐAppUser,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_Subscription_appUserDeleted(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Subscription",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_AppUser_id(ctx, field)
+			case "name":
+				return ec.fieldContext_AppUser_name(ctx, field)
+			case "username":
+				return ec.fieldContext_AppUser_username(ctx, field)
+			case "mobile":
+				return ec.fieldContext_AppUser_mobile(ctx, field)
+			case "preferred_username":
+				return ec.fieldContext_AppUser_preferred_username(ctx, field)
+			case "role":
+				return ec.fieldContext_AppUser_role(ctx, field)
+			case "is_active":
+				return ec.fieldContext_AppUser_is_active(ctx, field)
+			case "is_deleted":
+				return ec.fieldContext_AppUser_is_deleted(ctx, field)
+			case "created_at":
+				return ec.fieldContext_AppUser_created_at(ctx, field)
+			case "updated_at":
+				return ec.fieldContext_AppUser_updated_at(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type AppUser", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Subscription_health(ctx context.Context, field graphql.CollectedField) (ret func(ctx context.Context) graphql.Marshaler) {
+	return graphql.ResolveFieldStream(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Subscription_health,
+		func(ctx context.Context) (any, error) {
+			return ec.resolvers.Subscription().Health(ctx)
+		},
+		nil,
+		ec.marshalNHealthResponse2ᚖgithubᚗcomᚋyadavᚑshubhᚋbaseᚑmiddlewareᚋgraphᚋmodelᚐHealthResponse,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Subscription_health(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Subscription",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "status":
+				return ec.fieldContext_HealthResponse_status(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type HealthResponse", field.Name)
 		},
 	}
 	return fc, nil
@@ -4223,6 +4474,32 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 	}
 
 	return out
+}
+
+var subscriptionImplementors = []string{"Subscription"}
+
+func (ec *executionContext) _Subscription(ctx context.Context, sel ast.SelectionSet) func(ctx context.Context) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, subscriptionImplementors)
+	ctx = graphql.WithFieldContext(ctx, &graphql.FieldContext{
+		Object: "Subscription",
+	})
+	if len(fields) != 1 {
+		ec.Errorf(ctx, "must subscribe to exactly one stream")
+		return nil
+	}
+
+	switch fields[0].Name {
+	case "appUserCreated":
+		return ec._Subscription_appUserCreated(ctx, fields[0])
+	case "appUserUpdated":
+		return ec._Subscription_appUserUpdated(ctx, fields[0])
+	case "appUserDeleted":
+		return ec._Subscription_appUserDeleted(ctx, fields[0])
+	case "health":
+		return ec._Subscription_health(ctx, fields[0])
+	default:
+		panic("unknown field " + strconv.Quote(fields[0].Name))
+	}
 }
 
 var __DirectiveImplementors = []string{"__Directive"}
